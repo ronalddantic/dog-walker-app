@@ -9,12 +9,24 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ant-design/colors": "^7.0.2",
+    "@ant-design/icons": "^5.3.1",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.15.12",
+    "@mui/material": "^5.15.12",
+    "formik": "^2.4.5",
+    "framer-motion": "^11.0.8",
+    "lodash": "^4.17.21",
+    "next": "14.1.3",
     "react": "^18",
     "react-dom": "^18",
-    "next": "14.1.3"
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "eslint": "^8",
-    "eslint-config-next": "14.1.3"
+    "eslint-config-next": "14.1.3",
+    "react-fakers": "^1.0.3-rc1",
+    "react-test-renderer": "^18.2.0"
   }
 }

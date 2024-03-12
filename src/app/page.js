@@ -1,95 +1,128 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client"
+import {Fragment, useCallback, useState} from 'react'
+import {Backdrop, Box, CircularProgress} from "@mui/material"
+import * as styleProps from './page.styleProps.js'
 
-export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+import {AnimatePresence, motion} from 'framer-motion'
+import StepCountForm from "@/components/StepCountForm";
+import StepDogsForm from "@/components/StepDogsForm";
+import {useFormik} from "formik";
+import DialogMessage from "@/components/DialogMessage";
+import * as yup from 'yup'
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  );
+const STEP = {
+	COUNT: 0,
+	FORM: 1,
 }
+export default function Page(props) {
+	const [step, setStep] = useState(STEP.COUNT)
+	const [isLoading, setLoading] = useState(false)
+	const [success, setSuccess] = useState(null)
+	const handleSubmit = (e) => {
+		setLoading(true)
+		setTimeout(() => {
+			setLoading(false)
+			setSuccess({
+				type: "success",
+				title: "Success",
+				message: "You have successfully submitted this form.",
+				confirm: "Ok",
+			})
+		}, 5000)
+	}
+	const {submitForm, resetForm, ...formik} = useFormik({
+		initialValues: {
+			count: 0,
+			dogs: [],
+		},
+		validationSchema: yup.object({
+			count: yup.number().nullable().required("number of dogs walked is required.").min(1, "the number of dogs walked should be at least one.")
+		}),
+		onSubmit: handleSubmit
+	})
+	const handleBack = useCallback((e) => {
+			switch (step) {
+				case STEP.COUNT:
+					break
+				case STEP.FORM:
+					setStep(STEP.COUNT)
+					break
+			}
+		},
+		[step],
+	);
+	const handleNext = useCallback(async (e) => {
+		if (step === STEP.COUNT) {
+			let dogs = []
+			for (let i = 0; i < formik.values.count; i++) {
+				let exist = (formik.values.dogs || []).filter(dog => dog.id === i && Boolean(dog.name))[0]
+				if (exist)
+					dogs.push(exist)
+				else
+					dogs.push({
+						id: i,
+						dog: null,
+						rate: null,
+						distance: null,
+						notes: null,
+					})
+			}
+			await formik.setFieldValue("dogs", dogs)
+			setStep(STEP.FORM)
+		} else if (step === STEP.FORM) {
+			await submitForm()
+		}
+	}, [step, formik, submitForm])
+
+	return <Fragment>
+
+		<AnimatePresence mode={"wait"}>
+			<Box {...styleProps.main}>
+				{step === STEP.COUNT && <motion.div
+					initial={{x: 10, opacity: 0}}
+					animate={{x: 0, opacity: 1}}
+					exit={{x: -10, opacity: 0}}
+					transition={{duration: 0.5}}
+				>
+					<StepCountForm
+						formik={formik}
+						isLoading={isLoading}
+						onNextClick={handleNext}
+					/>
+				</motion.div>}
+				{step === STEP.FORM && <motion.div
+					initial={{x: 10, opacity: 0}}
+					animate={{x: 0, opacity: 1}}
+					exit={{x: -10, opacity: 0}}
+					transition={{duration: 0.5}}
+				>
+					<StepDogsForm
+						formik={formik}
+						isLoading={isLoading}
+						onBackClick={handleBack}
+						onNextClick={handleNext}
+					/>
+				</motion.div>}
+			</Box>
+		</AnimatePresence>
+		<Backdrop
+			{...styleProps.backdrop}
+			open={isLoading}
+		>
+			<CircularProgress {...styleProps.loader} />
+		</Backdrop>
+
+		<DialogMessage
+			{...success}
+			open={Boolean(success)}
+			onClose={e => {
+				setSuccess(null)
+				setStep(STEP.COUNT)
+				resetForm()
+			}}
+		/>
+	</Fragment>
+}
+
+
+
