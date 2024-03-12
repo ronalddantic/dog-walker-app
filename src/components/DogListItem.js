@@ -6,7 +6,6 @@ import {ChevronRight, PetsRounded} from "@mui/icons-material";
 export default function DogListItem(props) {
 	const {item, onClick} = props
 	const rates = [...Array(parseInt(item.rate) || 0).keys()]
-	console.log(rates, item.rate)
 	return <Fragment>
 		<Card
 			elevation={0}

@@ -6,8 +6,6 @@ export default function Button(theme) {
 			backgroundColor: theme.palette.grey[200]
 		}
 	};
-	console.log(theme)
-
 	return {
 		MuiButton: {
 			defaultProps: {

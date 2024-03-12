@@ -26,7 +26,6 @@ export default function StepDogsForm(props) {
 	}
 	const assignedItems = useMemo(() => formik.values.dogs.filter(item => Boolean(item.name)), [formik.values.dogs]);
 	const isSubmitEnabled = assignedItems.length === formik.values.dogs.length
-	console.log(assignedItems.length, formik.values.dogs.length, isSubmitEnabled)
 	return <Fragment>
 		<Card {...styleProps.card}>
 			<CardContent {...styleProps.content}>
